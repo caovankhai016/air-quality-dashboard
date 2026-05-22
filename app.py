@@ -33,7 +33,8 @@ def init_db():
     print("[DB] Database sẵn sàng.")
 
 # ── API: ESP32 GỬI DỮ LIỆU LÊN ───────────────────────────────────────────────
-@app.route("/api/data", methods=["GET", "POST"])
+@app.route("/api/push", methods=["GET", "POST"])
+@app.route("/api/data", methods=["GET", "POST"])  # giữ lại để tương thích
 def receive_data():
     """
     Nhận dữ liệu từ ESP32 qua 2 cách:
