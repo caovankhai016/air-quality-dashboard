@@ -34,12 +34,9 @@ def init_db():
 # ── API: ESP32 GỬI DỮ LIỆU LÊN ───────────────────────────────────────────────
 @app.route("/api/data", methods=["POST"])
 def receive_data():
-    """
-    ESP32 gửi POST request với JSON body:
-    { "pm25": 45.2, "temp": 28.5, "humidity": 65.0 }
-    """
-    data = request.get_json()
+    data = request.get_json(force=True, silent=True)
     if not data:
+        print("[ERROR] Không nhận được JSON!")
         return jsonify({"error": "No JSON data received"}), 400
 
     pm25     = data.get("pm25", 0)
@@ -48,14 +45,22 @@ def receive_data():
     relay_on = 1 if data.get("relay_on", False) else 0
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    with get_db() as conn:
+    conn = None
+    try:
+        conn = sqlite3.connect(DB_PATH)
         conn.execute(
             "INSERT INTO sensor_data (timestamp, pm25, temp, humidity, relay_on) VALUES (?, ?, ?, ?, ?)",
             (timestamp, pm25, temp, humidity, relay_on)
         )
         conn.commit()
+        print(f"[DATA] SAVED: {timestamp} | PM2.5={pm25} | Temp={temp} | Humi={humidity} | Relay={'ON' if relay_on else 'OFF'}")
+    except Exception as e:
+        print(f"[ERROR] DB write failed: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
-    print(f"[DATA] {timestamp} | PM2.5={pm25} | Temp={temp}°C | Humi={humidity}% | Relay={'ON' if relay_on else 'OFF'}")
     return jsonify({"status": "ok", "timestamp": timestamp}), 200
 
 # ── API: WEB DASHBOARD LẤY LỊCH SỬ ──────────────────────────────────────────
