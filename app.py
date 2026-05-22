@@ -4,6 +4,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
+app.url_map.strict_slashes = False  # ngăn Railway proxy chuyển POST → GET do redirect trailing slash
 
 # ── CẤU HÌNH DATABASE ────────────────────────────────────────────────────────
 # Dùng /tmp để đảm bảo có quyền ghi trong mọi môi trường (Railway, local...)
