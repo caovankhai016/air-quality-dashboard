@@ -33,17 +33,25 @@ def init_db():
     print("[DB] Database sẵn sàng.")
 
 # ── API: ESP32 GỬI DỮ LIỆU LÊN ───────────────────────────────────────────────
-@app.route("/api/data", methods=["POST"])
+@app.route("/api/data", methods=["GET", "POST"])
 def receive_data():
-    data = request.get_json(force=True, silent=True)
-    if not data:
-        print("[ERROR] Không nhận được JSON!")
-        return jsonify({"error": "No JSON data received"}), 400
+    """
+    Nhận dữ liệu từ ESP32 qua 2 cách:
+    - GET:  /api/data?pm25=12.4&temp=28.5&humidity=65.0&relay_on=false
+    - POST: body JSON {"pm25":12.4,"temp":28.5,"humidity":65.0,"relay_on":false}
+    """
+    if request.method == "POST":
+        data = request.get_json(force=True, silent=True) or {}
+        pm25     = float(data.get("pm25", 0))
+        temp     = float(data.get("temp", 0))
+        humidity = float(data.get("humidity", 0))
+        relay_on = 1 if data.get("relay_on", False) else 0
+    else:  # GET — Railway proxy chuyển POST→GET
+        pm25     = float(request.args.get("pm25", 0))
+        temp     = float(request.args.get("temp", 0))
+        humidity = float(request.args.get("humidity", 0))
+        relay_on = 1 if request.args.get("relay_on", "false").lower() == "true" else 0
 
-    pm25     = data.get("pm25", 0)
-    temp     = data.get("temp", 0)
-    humidity = data.get("humidity", 0)
-    relay_on = 1 if data.get("relay_on", False) else 0
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = None
@@ -54,7 +62,7 @@ def receive_data():
             (timestamp, pm25, temp, humidity, relay_on)
         )
         conn.commit()
-        print(f"[DATA] SAVED: {timestamp} | PM2.5={pm25} | Temp={temp} | Humi={humidity} | Relay={'ON' if relay_on else 'OFF'}")
+        print(f"[DATA] SAVED via {request.method}: {timestamp} | PM2.5={pm25} | Temp={temp} | Humi={humidity}")
     except Exception as e:
         print(f"[ERROR] DB write failed: {e}")
         return jsonify({"error": str(e)}), 500
