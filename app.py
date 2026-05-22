@@ -6,7 +6,8 @@ import os
 app = Flask(__name__)
 
 # ── CẤU HÌNH DATABASE ────────────────────────────────────────────────────────
-DB_PATH = "airquality.db"
+# Dùng /tmp để đảm bảo có quyền ghi trong mọi môi trường (Railway, local...)
+DB_PATH = os.path.join("/tmp", "airquality.db")
 
 def get_db():
     """Mở kết nối tới SQLite database."""
