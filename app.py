@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import sqlite3
 import os
 
@@ -53,7 +53,8 @@ def receive_data():
         humidity = float(request.args.get("humidity", 0))
         relay_on = 1 if request.args.get("relay_on", "false").lower() == "true" else 0
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    VN_TZ = timezone(timedelta(hours=7))
+    timestamp = datetime.now(VN_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
     conn = None
     try:
