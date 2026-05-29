@@ -237,6 +237,59 @@
       border-bottom: 1px solid var(--border);
       font-size: 0.95rem;
       font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .export-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .select-range {
+      background: var(--bg-card2);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .select-range:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-export {
+      background: linear-gradient(135deg, #2ea44f 0%, #22863a 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-export:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-export:active {
+      transform: translateY(0);
     }
 
     table {
@@ -353,7 +406,18 @@
 
   <!-- Data Table -->
   <div class="table-card">
-    <div class="table-header">📋 Lịch sử dữ liệu</div>
+    <div class="table-header">
+      <span>📋 Lịch sử dữ liệu</span>
+      <div class="export-controls">
+        <select id="export-range" class="select-range">
+          <option value="all">Từ trước đến nay (Tất cả)</option>
+          <option value="30d">1 tháng gần đây</option>
+          <option value="7d">1 tuần gần đây</option>
+          <option value="1d">1 ngày gần đây</option>
+        </select>
+        <button onclick="triggerExport()" class="btn-export">📥 Xuất file CSV</button>
+      </div>
+    </div>
     <table>
       <thead>
         <tr>
@@ -510,6 +574,12 @@ async function fetchData() {
     document.getElementById("status-text").textContent = "Mất kết nối";
     console.error("Fetch error:", err);
   }
+}
+
+// ── XUẤT CSV ────────────────────────────────────────────────────────────────
+function triggerExport() {
+  const range = document.getElementById("export-range").value;
+  window.location.href = `/api/export?range=${range}`;
 }
 
 // ── TỰ ĐỘNG CẬP NHẬT MỖI 15 GIÂY (khớp với chu kỳ ESP32) ──────────────────
