@@ -12,8 +12,6 @@ app.url_map.strict_slashes = False  # ngăn Railway proxy chuyển POST → GET 
 MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("DATABASE_URL")
 
 if not MONGO_URI:
-    # In danh sách các biến môi trường (chỉ in Tên/Key, KHÔNG in Giá trị/Value để bảo mật mật khẩu)
-    print(f"[DEBUG] Danh sách các biến môi trường Railway truyền vào: {list(os.environ.keys())}")
     # Nếu chạy local mà chưa cài biến môi trường, thông báo lỗi cụ thể để người dùng cấu hình
     raise ValueError(
         "[DB ERROR] Chưa cấu hình biến môi trường MONGO_URI!\n"
@@ -155,17 +153,15 @@ def export_data():
     writer = csv.writer(output)
     
     # Ghi tiêu đề các cột
-    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "Nhiệt độ (°C)", "Độ ẩm (%)", "Trạng thái Relay"])
+    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "Nhiệt độ (°C)", "Độ ẩm (%)"])
     
     # Ghi dữ liệu từng dòng
     for r in records:
-        relay_state = "Bật" if r.get("relay_on") == 1 else "Tắt"
         writer.writerow([
             r.get("timestamp"),
             f"{float(r.get('pm25', 0)):.1f}",
             f"{float(r.get('temp', 0)):.1f}",
-            f"{float(r.get('humidity', 0)):.1f}",
-            relay_state
+            f"{float(r.get('humidity', 0)):.1f}"
         ])
 
     # Tạo Response trả về cho trình duyệt bắt đầu tải xuống
