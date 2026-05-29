@@ -12,6 +12,8 @@ app.url_map.strict_slashes = False  # ngăn Railway proxy chuyển POST → GET 
 MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("DATABASE_URL")
 
 if not MONGO_URI:
+    # In danh sách các biến môi trường (chỉ in Tên/Key, KHÔNG in Giá trị/Value để bảo mật mật khẩu)
+    print(f"[DEBUG] Danh sách các biến môi trường Railway truyền vào: {list(os.environ.keys())}")
     # Nếu chạy local mà chưa cài biến môi trường, thông báo lỗi cụ thể để người dùng cấu hình
     raise ValueError(
         "[DB ERROR] Chưa cấu hình biến môi trường MONGO_URI!\n"
