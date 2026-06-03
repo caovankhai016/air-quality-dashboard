@@ -51,17 +51,19 @@ def init_db():
 def receive_data():
     """
     Nhận dữ liệu từ ESP32 qua 2 cách:
-    - GET:  /api/data?pm25=12.4&temp=28.5&humidity=65.0&relay_on=false
-    - POST: body JSON {"pm25":12.4,"temp":28.5,"humidity":65.0,"relay_on":false}
+    - GET:  /api/data?pm25=12.4&pm10=18.0&temp=28.5&humidity=65.0&relay_on=false
+    - POST: body JSON {"pm25":12.4,"pm10":18.0,"temp":28.5,"humidity":65.0,"relay_on":false}
     """
     if request.method == "POST":
         data = request.get_json(force=True, silent=True) or {}
         pm25     = float(data.get("pm25", 0))
+        pm10     = float(data.get("pm10", 0))
         temp     = float(data.get("temp", 0))
         humidity = float(data.get("humidity", 0))
         relay_on = 1 if data.get("relay_on", False) else 0
     else:  # GET — Railway proxy chuyển POST→GET
         pm25     = float(request.args.get("pm25", 0))
+        pm10     = float(request.args.get("pm10", 0))
         temp     = float(request.args.get("temp", 0))
         humidity = float(request.args.get("humidity", 0))
         relay_on = 1 if request.args.get("relay_on", "false").lower() == "true" else 0
@@ -73,11 +75,12 @@ def receive_data():
         db.sensor_data.insert_one({
             "timestamp": timestamp,
             "pm25": pm25,
+            "pm10": pm10,
             "temp": temp,
             "humidity": humidity,
             "relay_on": relay_on
         })
-        print(f"[DATA] SAVED: {timestamp} | PM2.5={pm25} | Temp={temp} | Humi={humidity} | Relay={relay_on}")
+        print(f"[DATA] SAVED: {timestamp} | PM2.5={pm25} | PM10={pm10} | Temp={temp} | Humi={humidity} | Relay={relay_on}")
         return jsonify({"status": "ok", "timestamp": timestamp}), 200
     except Exception as e:
         print(f"[ERROR] MongoDB write failed: {e}")
@@ -153,13 +156,14 @@ def export_data():
     writer = csv.writer(output)
     
     # Ghi tiêu đề các cột
-    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "Nhiệt độ (°C)", "Độ ẩm (%)"])
+    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "PM10 (µg/m³)", "Nhiệt độ (°C)", "Độ ẩm (%)"])
     
     # Ghi dữ liệu từng dòng
     for r in records:
         writer.writerow([
             r.get("timestamp"),
             f"{float(r.get('pm25', 0)):.1f}",
+            f"{float(r.get('pm10', 0)):.1f}",
             f"{float(r.get('temp', 0)):.1f}",
             f"{float(r.get('humidity', 0)):.1f}"
         ])

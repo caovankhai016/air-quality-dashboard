@@ -380,6 +380,12 @@
       <div class="card-sub aqi-good" id="aqi-badge">--</div>
     </div>
 
+    <div class="card" id="card-pm10" style="--card-accent: #a371f7;">
+      <div class="card-label">⚫ Bụi PM10</div>
+      <div class="card-value" id="val-pm10">--<span class="card-unit">μg/m³</span></div>
+      <div class="card-sub" id="pm10-badge" style="background:rgba(163,113,247,.15);color:#a371f7;">--</div>
+    </div>
+
     <div class="card" style="--card-accent: #f0883e;">
       <div class="card-label">🌡️ Nhiệt độ</div>
       <div class="card-value" id="val-temp">--<span class="card-unit">°C</span></div>
@@ -393,10 +399,10 @@
 
   </div>
 
-  <!-- PM2.5 Chart -->
+  <!-- PM2.5 + PM10 Charts -->
   <div class="chart-card">
     <div class="chart-header">
-      <span class="chart-title">📈 Lịch sử PM2.5</span>
+      <span class="chart-title">📈 Lịch sử PM2.5 & PM10</span>
       <span style="font-size:0.75rem;color:var(--text-muted);">100 điểm gần nhất · tự động cập nhật</span>
     </div>
     <div class="chart-wrapper">
@@ -423,13 +429,14 @@
         <tr>
           <th>Thời gian</th>
           <th>PM2.5 (μg/m³)</th>
-          <th>Mức độ</th>
+          <th>PM10 (μg/m³)</th>
+          <th>Mức độ PM2.5</th>
           <th>Nhiệt độ (°C)</th>
           <th>Độ ẩm (%)</th>
         </tr>
       </thead>
       <tbody id="table-body">
-        <tr><td colspan="5" class="empty"><span>📡</span>Chưa có dữ liệu. Đợi ESP32 gửi lên...</td></tr>
+        <tr><td colspan="6" class="empty"><span>📡</span>Chưa có dữ liệu. Đợi ESP32 gửi lên...</td></tr>
       </tbody>
     </table>
   </div>
@@ -457,23 +464,41 @@ const chart = new Chart(ctx, {
   type: "line",
   data: {
     labels: [],
-    datasets: [{
-      label: "PM2.5 (μg/m³)",
-      data: [],
-      borderColor: "#58a6ff",
-      backgroundColor: "rgba(88,166,255,0.08)",
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      fill: true,
-      tension: 0.35,
-    }]
+    datasets: [
+      {
+        label: "PM2.5 (μg/m³)",
+        data: [],
+        borderColor: "#58a6ff",
+        backgroundColor: "rgba(88,166,255,0.08)",
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.35,
+        yAxisID: "y",
+      },
+      {
+        label: "PM10 (μg/m³)",
+        data: [],
+        borderColor: "#a371f7",
+        backgroundColor: "rgba(163,113,247,0.06)",
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.35,
+        yAxisID: "y",
+      }
+    ]
   },
   options: {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        display: true,
+        labels: { color: "#7d8590", font: { size: 12 }, boxWidth: 14 }
+      },
       tooltip: {
         backgroundColor: "#1c2330",
         borderColor: "rgba(255,255,255,0.1)",
@@ -481,7 +506,7 @@ const chart = new Chart(ctx, {
         titleColor: "#7d8590",
         bodyColor: "#e6edf3",
         callbacks: {
-          label: ctx => ` PM2.5: ${ctx.parsed.y.toFixed(1)} μg/m³`
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} μg/m³`
         }
       }
     },
@@ -502,6 +527,7 @@ const chart = new Chart(ctx, {
 // ── CẬP NHẬT UI ─────────────────────────────────────────────────────────────
 function updateLatest(data) {
   const pm25 = parseFloat(data.pm25);
+  const pm10 = parseFloat(data.pm10 || 0);
   const aqi  = getAQI(pm25);
 
   // Card PM2.5
@@ -510,6 +536,12 @@ function updateLatest(data) {
   document.getElementById("aqi-badge").textContent = aqi.label;
   document.getElementById("aqi-badge").className   = `card-sub ${aqi.cls}`;
   document.getElementById("card-pm25").style.setProperty("--card-accent", aqi.color);
+
+  // Card PM10
+  document.getElementById("val-pm10").innerHTML =
+    `${pm10.toFixed(1)}<span class="card-unit">μg/m³</span>`;
+  const pm10Label = pm10 <= 54 ? "Tốt" : pm10 <= 154 ? "Trung bình" : pm10 <= 254 ? "Không tốt" : "Nguy hiểm";
+  document.getElementById("pm10-badge").textContent = pm10Label;
 
   // Card nhiệt độ & độ ẩm
   document.getElementById("val-temp").innerHTML =
@@ -526,8 +558,9 @@ function updateLatest(data) {
 }
 
 function updateChart(history) {
-  chart.data.labels   = history.map(r => r.timestamp.slice(11, 16)); // HH:MM
-  chart.data.datasets[0].data = history.map(r => parseFloat(r.pm25));
+  chart.data.labels              = history.map(r => r.timestamp.slice(11, 16)); // HH:MM
+  chart.data.datasets[0].data   = history.map(r => parseFloat(r.pm25));
+  chart.data.datasets[1].data   = history.map(r => parseFloat(r.pm10 || 0));
   chart.update();
 }
 
@@ -538,10 +571,12 @@ function updateTable(history) {
   // Hiển thị mới nhất trước
   const rows = [...history].reverse().slice(0, 50);
   tbody.innerHTML = rows.map(r => {
-    const aqi = getAQI(parseFloat(r.pm25));
+    const aqi  = getAQI(parseFloat(r.pm25));
+    const pm10 = parseFloat(r.pm10 || 0);
     return `<tr>
       <td>${r.timestamp}</td>
       <td class="td-pm25" style="color:${aqi.color}">${parseFloat(r.pm25).toFixed(1)}</td>
+      <td>${pm10.toFixed(1)}</td>
       <td><span class="badge ${aqi.cls}">${aqi.label}</span></td>
       <td>${parseFloat(r.temp).toFixed(1)}</td>
       <td>${parseFloat(r.humidity).toFixed(1)}</td>
