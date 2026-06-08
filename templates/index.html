@@ -701,7 +701,7 @@ function updateLatest(data) {
   } else {
     document.getElementById("val-aqi").textContent   = "--";
     document.getElementById("val-aqi").style.color   = "var(--text-muted)";
-    document.getElementById("aqi-category-badge").textContent = "Chưa có (cần ≥ 1 giờ hoạt động)";
+    document.getElementById("aqi-category-badge").textContent = "Chưa có — chờ đến đầu giờ tiếp theo";
     document.getElementById("aqi-category-badge").className   = "aqi-category-badge aqi-good";
     document.querySelectorAll(".aqi-scale-seg")
             .forEach(s => s.classList.remove("active"));
