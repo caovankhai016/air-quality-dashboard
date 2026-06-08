@@ -491,7 +491,7 @@
       </div>
     </div>
     <div class="aqi-full-right">
-      <div class="aqi-note">Cập nhật mỗi giờ · Chuẩn US EPA 2012 · Tính từ PM2.5 & PM10 trung bình 1 giờ</div>
+      <div class="aqi-note">Cập nhật mỗi giờ · Chuẩn US EPA 2024 · Tính từ PM2.5 &amp; PM10 trung bình 1 giờ</div>
       <div class="aqi-scale-bar" id="aqi-scale-bar">
         <div class="aqi-scale-seg" style="background:#3fb950;" title="Tốt (0–50)"></div>
         <div class="aqi-scale-seg" style="background:#d29922;" title="Trung bình (51–100)"></div>
@@ -548,14 +548,15 @@
 </main>
 
 <script>
-// ── MỨC ĐỘ THEO NỒNG ĐỘ PM2.5 (µg/m³) ──────────────────────────────────────
+// ── MỨC ĐỘ THEO NỒNG ĐỘ PM2.5 (µg/m³) ────────────────────────────────────────────
 // Dùng cho badge trên card PM2.5 và cột "Mức độ PM2.5" trong bảng
+// Breakpoints theo chuẩn US EPA 2024 (hiệu lực 6/5/2024)
 const AQI_LEVELS = [
-  { max: 12,       label: "Tốt",        cls: "aqi-good",      color: "#3fb950" },
+  { max: 9.0,      label: "Tốt",        cls: "aqi-good",      color: "#3fb950" },
   { max: 35.4,     label: "Trung bình", cls: "aqi-moderate",  color: "#d29922" },
   { max: 55.4,     label: "Kém",        cls: "aqi-sensitive", color: "#f0883e" },
-  { max: 150.4,    label: "Xấu",        cls: "aqi-unhealthy", color: "#f85149" },
-  { max: 250.4,    label: "Rất xấu",    cls: "aqi-very",      color: "#c678dd" },
+  { max: 125.4,    label: "Xấu",        cls: "aqi-unhealthy", color: "#f85149" },
+  { max: 225.4,    label: "Rất xấu",    cls: "aqi-very",      color: "#c678dd" },
   { max: Infinity, label: "Nguy hại",   cls: "aqi-hazardous", color: "#8b2be2" },
 ];
 
