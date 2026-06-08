@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Air Quality Monitor — Dashboard</title>
+  <title>Giám Sát Chất Lượng Không Khí — Dashboard</title>
   <meta name="description" content="Hệ thống giám sát chất lượng không khí real-time với ESP32 và PMS7003" />
 
   <!-- Google Fonts -->
@@ -26,7 +26,7 @@
       --text-muted: #7d8590;
       --accent:     #58a6ff;
 
-      /* AQI colours */
+      /* Màu sắc theo mức AQI */
       --aqi-good:       #3fb950;
       --aqi-moderate:   #d29922;
       --aqi-sensitive:  #f0883e;
@@ -127,7 +127,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
     }
 
     .card {
@@ -184,15 +184,106 @@
       display: inline-block;
     }
 
-    /* AQI badge styles */
-    .aqi-good      { background: rgba(63,185,80,.15); color: var(--aqi-good); }
+    /* Màu badge AQI */
+    .aqi-good      { background: rgba(63,185,80,.15);  color: var(--aqi-good); }
     .aqi-moderate  { background: rgba(210,153,34,.15); color: var(--aqi-moderate); }
     .aqi-sensitive { background: rgba(240,136,62,.15); color: var(--aqi-sensitive); }
     .aqi-unhealthy { background: rgba(248,81,73,.15);  color: var(--aqi-unhealthy); }
     .aqi-very      { background: rgba(198,120,221,.15);color: var(--aqi-very); }
     .aqi-hazardous { background: rgba(139,43,226,.15); color: var(--aqi-hazardous); }
 
-    /* ── CHART SECTION ───────────────────────────────────────────────────── */
+    /* ── CARD AQI TỔNG HỢP (Full-width) ─────────────────────────────────── */
+    .aqi-full-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+
+    .aqi-full-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+      background: var(--aqi-accent, var(--aqi-good));
+      transition: background 0.4s;
+    }
+
+    .aqi-full-left {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex: 1;
+    }
+
+    .aqi-number-display {
+      font-size: 4rem;
+      font-weight: 800;
+      line-height: 1;
+      transition: color 0.4s;
+      min-width: 100px;
+    }
+
+    .aqi-info { display: flex; flex-direction: column; gap: 6px; }
+
+    .aqi-label-text {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .aqi-category-badge {
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .aqi-full-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .aqi-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .aqi-scale-bar {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .aqi-scale-seg {
+      height: 6px;
+      width: 30px;
+      border-radius: 3px;
+      opacity: 0.4;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .aqi-scale-seg.active {
+      opacity: 1;
+      transform: scaleY(1.8);
+    }
+
+    /* ── PHẦN BIỂU ĐỒ ───────────────────────────────────────────────────── */
     .section-title {
       font-size: 0.85rem;
       font-weight: 600;
@@ -224,7 +315,7 @@
 
     .chart-wrapper { position: relative; height: 260px; }
 
-    /* ── TABLE ───────────────────────────────────────────────────────────── */
+    /* ── BẢNG DỮ LIỆU ───────────────────────────────────────────────────── */
     .table-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -263,9 +354,7 @@
       transition: border-color 0.2s;
     }
 
-    .select-range:focus {
-      border-color: var(--accent);
-    }
+    .select-range:focus { border-color: var(--accent); }
 
     .btn-export {
       background: linear-gradient(135deg, #2ea44f 0%, #22863a 100%);
@@ -283,14 +372,8 @@
       transition: opacity 0.2s, transform 0.1s;
     }
 
-    .btn-export:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    .btn-export:active {
-      transform: translateY(0);
-    }
+    .btn-export:hover  { opacity: 0.9; transform: translateY(-1px); }
+    .btn-export:active { transform: translateY(0); }
 
     table {
       width: 100%;
@@ -318,10 +401,7 @@
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--bg-card2); }
 
-    tbody td {
-      padding: 11px 16px;
-      color: var(--text-main);
-    }
+    tbody td { padding: 11px 16px; color: var(--text-main); }
 
     .td-pm25 { font-weight: 600; }
 
@@ -332,7 +412,7 @@
       border-radius: 20px;
     }
 
-    /* ── EMPTY STATE ─────────────────────────────────────────────────────── */
+    /* ── TRẠNG THÁI TRỐNG ────────────────────────────────────────────────── */
     .empty {
       text-align: center;
       padding: 48px 0;
@@ -347,6 +427,9 @@
       header { padding: 16px 20px; }
       main   { padding: 20px 16px; }
       .card-value { font-size: 2.2rem; }
+      .aqi-full-card { flex-direction: column; align-items: flex-start; }
+      .aqi-full-right { align-items: flex-start; }
+      .aqi-number-display { font-size: 3rem; }
     }
   </style>
 </head>
@@ -355,11 +438,7 @@
 <!-- ── HEADER ──────────────────────────────────────────────────────────────── -->
 <header>
   <div class="logo">
-    <div class="logo-icon">🌬️</div>
-    <div>
-      <h1>Air Quality Monitor</h1>
-      <p>ESP32 · PMS7003 · DHT22</p>
-    </div>
+    <h1>Giám Sát Chất Lượng Không Khí</h1>
   </div>
   <div class="header-right">
     <div id="status-dot"><div class="dot" id="dot"></div><span id="status-text">Đang kết nối...</span></div>
@@ -367,22 +446,22 @@
   </div>
 </header>
 
-<!-- ── MAIN ────────────────────────────────────────────────────────────────── -->
+<!-- ── NỘI DUNG CHÍNH ──────────────────────────────────────────────────────── -->
 <main>
 
-  <!-- Metric Cards -->
+  <!-- Thẻ số liệu hiện tại -->
   <p class="section-title">Giá trị hiện tại</p>
   <div class="cards-grid">
 
     <div class="card" id="card-pm25" style="--card-accent: var(--aqi-good);">
       <div class="card-label">⚫ Bụi mịn PM2.5</div>
-      <div class="card-value" id="val-pm25">--<span class="card-unit">μg/m³</span></div>
+      <div class="card-value" id="val-pm25">--<span class="card-unit">µg/m³</span></div>
       <div class="card-sub aqi-good" id="aqi-badge">--</div>
     </div>
 
     <div class="card" id="card-pm10" style="--card-accent: #a371f7;">
       <div class="card-label">⚫ Bụi PM10</div>
-      <div class="card-value" id="val-pm10">--<span class="card-unit">μg/m³</span></div>
+      <div class="card-value" id="val-pm10">--<span class="card-unit">µg/m³</span></div>
       <div class="card-sub" id="pm10-badge" style="background:rgba(163,113,247,.15);color:#a371f7;">--</div>
     </div>
 
@@ -399,10 +478,35 @@
 
   </div>
 
-  <!-- PM2.5 + PM10 Charts -->
+  <!-- Thẻ AQI tổng hợp -->
+  <div class="aqi-full-card" id="aqi-full-card">
+    <div class="aqi-full-left">
+      <div>
+        <div class="aqi-label-text">🌍 Chỉ số chất lượng không khí (AQI)</div>
+        <div class="aqi-number-display" id="val-aqi" style="color: var(--aqi-good);">--</div>
+      </div>
+      <div class="aqi-info">
+        <div class="aqi-label-text">Mức độ</div>
+        <div class="aqi-category-badge aqi-good" id="aqi-category-badge">--</div>
+      </div>
+    </div>
+    <div class="aqi-full-right">
+      <div class="aqi-note">Cập nhật mỗi giờ · Chuẩn US EPA 2012 · Tính từ PM2.5 & PM10 trung bình 1 giờ</div>
+      <div class="aqi-scale-bar" id="aqi-scale-bar">
+        <div class="aqi-scale-seg" style="background:#3fb950;" title="Tốt (0–50)"></div>
+        <div class="aqi-scale-seg" style="background:#d29922;" title="Trung bình (51–100)"></div>
+        <div class="aqi-scale-seg" style="background:#f0883e;" title="Kém (101–150)"></div>
+        <div class="aqi-scale-seg" style="background:#f85149;" title="Xấu (151–200)"></div>
+        <div class="aqi-scale-seg" style="background:#c678dd;" title="Rất xấu (201–300)"></div>
+        <div class="aqi-scale-seg" style="background:#8b2be2;" title="Nguy hại (301–500)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Biểu đồ PM2.5 & PM10 -->
   <div class="chart-card">
     <div class="chart-header">
-      <span class="chart-title">📈 Lịch sử PM2.5 & PM10</span>
+      <span class="chart-title">📈 Lịch sử PM2.5 & PM10</span>
       <span style="font-size:0.75rem;color:var(--text-muted);">100 điểm gần nhất · tự động cập nhật</span>
     </div>
     <div class="chart-wrapper">
@@ -410,7 +514,7 @@
     </div>
   </div>
 
-  <!-- Data Table -->
+  <!-- Bảng lịch sử -->
   <div class="table-card">
     <div class="table-header">
       <span>📋 Lịch sử dữ liệu</span>
@@ -428,8 +532,8 @@
       <thead>
         <tr>
           <th>Thời gian</th>
-          <th>PM2.5 (μg/m³)</th>
-          <th>PM10 (μg/m³)</th>
+          <th>PM2.5 (µg/m³)</th>
+          <th>PM10 (µg/m³)</th>
           <th>Mức độ PM2.5</th>
           <th>Nhiệt độ (°C)</th>
           <th>Độ ẩm (%)</th>
@@ -444,21 +548,37 @@
 </main>
 
 <script>
-// ── CẤU HÌNH AQI ────────────────────────────────────────────────────────────
+// ── MỨC ĐỘ THEO NỒNG ĐỘ PM2.5 (µg/m³) ──────────────────────────────────────
+// Dùng cho badge trên card PM2.5 và cột "Mức độ PM2.5" trong bảng
 const AQI_LEVELS = [
-  { max: 12,    label: "Tốt",              cls: "aqi-good",      color: "#3fb950" },
-  { max: 35.4,  label: "Trung bình",       cls: "aqi-moderate",  color: "#d29922" },
-  { max: 55.4,  label: "Nhạy cảm",         cls: "aqi-sensitive", color: "#f0883e" },
-  { max: 150.4, label: "Không tốt",        cls: "aqi-unhealthy", color: "#f85149" },
-  { max: 250.4, label: "Rất không tốt",   cls: "aqi-very",      color: "#c678dd" },
-  { max: Infinity, label: "Nguy hiểm",    cls: "aqi-hazardous", color: "#8b2be2" },
+  { max: 12,       label: "Tốt",        cls: "aqi-good",      color: "#3fb950" },
+  { max: 35.4,     label: "Trung bình", cls: "aqi-moderate",  color: "#d29922" },
+  { max: 55.4,     label: "Kém",        cls: "aqi-sensitive", color: "#f0883e" },
+  { max: 150.4,    label: "Xấu",        cls: "aqi-unhealthy", color: "#f85149" },
+  { max: 250.4,    label: "Rất xấu",    cls: "aqi-very",      color: "#c678dd" },
+  { max: Infinity, label: "Nguy hại",   cls: "aqi-hazardous", color: "#8b2be2" },
+];
+
+// ── MỨC ĐỘ THEO CHỈ SỐ AQI (0–500) ─────────────────────────────────────────
+// Dùng cho card AQI tổng hợp (giá trị tính từ firmware ESP32)
+const AQI_VALUE_LEVELS = [
+  { max: 50,  label: "Tốt",        cls: "aqi-good",      color: "#3fb950", segIdx: 0 },
+  { max: 100, label: "Trung bình", cls: "aqi-moderate",  color: "#d29922", segIdx: 1 },
+  { max: 150, label: "Kém",        cls: "aqi-sensitive", color: "#f0883e", segIdx: 2 },
+  { max: 200, label: "Xấu",        cls: "aqi-unhealthy", color: "#f85149", segIdx: 3 },
+  { max: 300, label: "Rất xấu",    cls: "aqi-very",      color: "#c678dd", segIdx: 4 },
+  { max: 500, label: "Nguy hại",   cls: "aqi-hazardous", color: "#8b2be2", segIdx: 5 },
 ];
 
 function getAQI(pm25) {
   return AQI_LEVELS.find(l => pm25 <= l.max) || AQI_LEVELS.at(-1);
 }
 
-// ── KHỞI TẠO CHART ──────────────────────────────────────────────────────────
+function getAQICategory(aqiValue) {
+  return AQI_VALUE_LEVELS.find(l => aqiValue <= l.max) || AQI_VALUE_LEVELS.at(-1);
+}
+
+// ── KHỞI TẠO BIỂU ĐỒ ───────────────────────────────────────────────────────
 const ctx = document.getElementById("pm25Chart").getContext("2d");
 const chart = new Chart(ctx, {
   type: "line",
@@ -466,7 +586,7 @@ const chart = new Chart(ctx, {
     labels: [],
     datasets: [
       {
-        label: "PM2.5 (μg/m³)",
+        label: "PM2.5 (µg/m³)",
         data: [],
         borderColor: "#58a6ff",
         backgroundColor: "rgba(88,166,255,0.08)",
@@ -478,7 +598,7 @@ const chart = new Chart(ctx, {
         yAxisID: "y",
       },
       {
-        label: "PM10 (μg/m³)",
+        label: "PM10 (µg/m³)",
         data: [],
         borderColor: "#a371f7",
         backgroundColor: "rgba(163,113,247,0.06)",
@@ -506,41 +626,52 @@ const chart = new Chart(ctx, {
         titleColor: "#7d8590",
         bodyColor: "#e6edf3",
         callbacks: {
-          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} μg/m³`
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} µg/m³`
         }
       }
     },
     scales: {
       x: {
         ticks: { color: "#7d8590", maxTicksLimit: 8, font: { size: 11 } },
-        grid: { color: "rgba(255,255,255,0.05)" }
+        grid:  { color: "rgba(255,255,255,0.05)" }
       },
       y: {
         ticks: { color: "#7d8590", font: { size: 11 } },
-        grid: { color: "rgba(255,255,255,0.05)" },
+        grid:  { color: "rgba(255,255,255,0.05)" },
+        title: {
+          display: true,
+          text: "µg/m³",
+          color: "#7d8590",
+          font: { size: 11 }
+        },
         min: 0,
       }
     }
   }
 });
 
-// ── CẬP NHẬT UI ─────────────────────────────────────────────────────────────
+// ── CẬP NHẬT GIAO DIỆN ──────────────────────────────────────────────────────
 function updateLatest(data) {
-  const pm25 = parseFloat(data.pm25);
-  const pm10 = parseFloat(data.pm10 || 0);
-  const aqi  = getAQI(pm25);
+  const pm25   = parseFloat(data.pm25);
+  const pm10   = parseFloat(data.pm10 || 0);
+  const aqiVal = parseInt(data.aqi || 0);
+  const aqi    = getAQI(pm25);
 
   // Card PM2.5
   document.getElementById("val-pm25").innerHTML =
-    `${pm25.toFixed(1)}<span class="card-unit">μg/m³</span>`;
+    `${pm25.toFixed(1)}<span class="card-unit">µg/m³</span>`;
   document.getElementById("aqi-badge").textContent = aqi.label;
   document.getElementById("aqi-badge").className   = `card-sub ${aqi.cls}`;
   document.getElementById("card-pm25").style.setProperty("--card-accent", aqi.color);
 
   // Card PM10
   document.getElementById("val-pm10").innerHTML =
-    `${pm10.toFixed(1)}<span class="card-unit">μg/m³</span>`;
-  const pm10Label = pm10 <= 54 ? "Tốt" : pm10 <= 154 ? "Trung bình" : pm10 <= 254 ? "Không tốt" : "Nguy hiểm";
+    `${pm10.toFixed(1)}<span class="card-unit">µg/m³</span>`;
+  const pm10Label = pm10 <= 54  ? "Tốt"
+                  : pm10 <= 154 ? "Trung bình"
+                  : pm10 <= 254 ? "Kém"
+                  : pm10 <= 354 ? "Xấu"
+                  : "Rất xấu";
   document.getElementById("pm10-badge").textContent = pm10Label;
 
   // Card nhiệt độ & độ ẩm
@@ -549,18 +680,42 @@ function updateLatest(data) {
   document.getElementById("val-humi").innerHTML =
     `${parseFloat(data.humidity).toFixed(1)}<span class="card-unit">%</span>`;
 
-  // Status bar
-  const dot = document.getElementById("dot");
-  dot.className = "dot";
+  // Card AQI tổng hợp
+  if (aqiVal > 0) {
+    const cat = getAQICategory(aqiVal);
+    const numEl = document.getElementById("val-aqi");
+    numEl.textContent = aqiVal;
+    numEl.style.color = cat.color;
+
+    const badge = document.getElementById("aqi-category-badge");
+    badge.textContent = cat.label;
+    badge.className   = `aqi-category-badge ${cat.cls}`;
+
+    document.getElementById("aqi-full-card")
+            .style.setProperty("--aqi-accent", cat.color);
+
+    // Highlight thanh thang đo
+    document.querySelectorAll(".aqi-scale-seg")
+            .forEach((s, i) => s.classList.toggle("active", i === cat.segIdx));
+  } else {
+    document.getElementById("val-aqi").textContent   = "--";
+    document.getElementById("val-aqi").style.color   = "var(--text-muted)";
+    document.getElementById("aqi-category-badge").textContent = "Chưa có (cần ≥ 1 giờ hoạt động)";
+    document.getElementById("aqi-category-badge").className   = "aqi-category-badge aqi-good";
+    document.querySelectorAll(".aqi-scale-seg")
+            .forEach(s => s.classList.remove("active"));
+  }
+
+  // Thanh trạng thái
+  document.getElementById("dot").className = "dot";
   document.getElementById("status-text").textContent = "Đang hoạt động";
-  document.getElementById("last-update").textContent =
-    "Cập nhật: " + data.timestamp;
+  document.getElementById("last-update").textContent = "Cập nhật: " + data.timestamp;
 }
 
 function updateChart(history) {
-  chart.data.labels              = history.map(r => r.timestamp.slice(11, 16)); // HH:MM
-  chart.data.datasets[0].data   = history.map(r => parseFloat(r.pm25));
-  chart.data.datasets[1].data   = history.map(r => parseFloat(r.pm10 || 0));
+  chart.data.labels            = history.map(r => r.timestamp.slice(11, 16)); // HH:MM
+  chart.data.datasets[0].data = history.map(r => parseFloat(r.pm25));
+  chart.data.datasets[1].data = history.map(r => parseFloat(r.pm10 || 0));
   chart.update();
 }
 
@@ -568,11 +723,11 @@ function updateTable(history) {
   const tbody = document.getElementById("table-body");
   if (!history.length) return;
 
-  // Hiển thị mới nhất trước
+  // Hiển thị mới nhất trước, tối đa 50 dòng
   const rows = [...history].reverse().slice(0, 50);
   tbody.innerHTML = rows.map(r => {
-    const aqi  = getAQI(parseFloat(r.pm25));
-    const pm10 = parseFloat(r.pm10 || 0);
+    const aqi    = getAQI(parseFloat(r.pm25));
+    const pm10   = parseFloat(r.pm10 || 0);
     return `<tr>
       <td>${r.timestamp}</td>
       <td class="td-pm25" style="color:${aqi.color}">${parseFloat(r.pm25).toFixed(1)}</td>
@@ -584,7 +739,7 @@ function updateTable(history) {
   }).join("");
 }
 
-// ── FETCH DỮ LIỆU TỪ BACKEND ────────────────────────────────────────────────
+// ── LẤY DỮ LIỆU TỪ BACKEND ──────────────────────────────────────────────────
 async function fetchData() {
   try {
     const [latestRes, historyRes] = await Promise.all([
@@ -604,10 +759,9 @@ async function fetchData() {
     }
 
   } catch (err) {
-    // Mất kết nối với backend
     document.getElementById("dot").className = "dot offline";
     document.getElementById("status-text").textContent = "Mất kết nối";
-    console.error("Fetch error:", err);
+    console.error("Lỗi kết nối:", err);
   }
 }
 
@@ -617,7 +771,7 @@ function triggerExport() {
   window.location.href = `/api/export?range=${range}`;
 }
 
-// ── TỰ ĐỘNG CẬP NHẬT MỖI 15 GIÂY (khớp với chu kỳ ESP32) ──────────────────
+// ── TỰ ĐỘNG CẬP NHẬT MỖI 15 GIÂY (khớp chu kỳ ESP32) ───────────────────────
 fetchData();
 setInterval(fetchData, 15000);
 </script>

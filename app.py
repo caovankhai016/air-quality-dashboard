@@ -61,12 +61,14 @@ def receive_data():
         temp     = float(data.get("temp", 0))
         humidity = float(data.get("humidity", 0))
         relay_on = 1 if data.get("relay_on", False) else 0
+        aqi      = int(data.get("aqi", 0))
     else:  # GET — Railway proxy chuyển POST→GET
         pm25     = float(request.args.get("pm25", 0))
         pm10     = float(request.args.get("pm10", 0))
         temp     = float(request.args.get("temp", 0))
         humidity = float(request.args.get("humidity", 0))
         relay_on = 1 if request.args.get("relay_on", "false").lower() == "true" else 0
+        aqi      = int(request.args.get("aqi", 0))
 
     VN_TZ = timezone(timedelta(hours=7))
     timestamp = datetime.now(VN_TZ).strftime("%Y-%m-%d %H:%M:%S")
@@ -78,7 +80,8 @@ def receive_data():
             "pm10": pm10,
             "temp": temp,
             "humidity": humidity,
-            "relay_on": relay_on
+            "relay_on": relay_on,
+            "aqi": aqi
         })
         print(f"[DATA] SAVED: {timestamp} | PM2.5={pm25} | PM10={pm10} | Temp={temp} | Humi={humidity} | Relay={relay_on}")
         return jsonify({"status": "ok", "timestamp": timestamp}), 200
@@ -156,7 +159,7 @@ def export_data():
     writer = csv.writer(output)
     
     # Ghi tiêu đề các cột
-    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "PM10 (µg/m³)", "Nhiệt độ (°C)", "Độ ẩm (%)"])
+    writer.writerow(["Thời gian", "PM2.5 (µg/m³)", "PM10 (µg/m³)", "AQI", "Nhiệt độ (°C)", "Độ ẩm (%)"])
     
     # Ghi dữ liệu từng dòng
     for r in records:
@@ -164,6 +167,7 @@ def export_data():
             r.get("timestamp"),
             f"{float(r.get('pm25', 0)):.1f}",
             f"{float(r.get('pm10', 0)):.1f}",
+            int(r.get('aqi', 0)),
             f"{float(r.get('temp', 0)):.1f}",
             f"{float(r.get('humidity', 0)):.1f}"
         ])
