@@ -571,6 +571,10 @@ const AQI_VALUE_LEVELS = [
   { max: 500, label: "Nguy hại",   cls: "aqi-hazardous", color: "#8b2be2", segIdx: 5 },
 ];
 
+// Giá trị AQI hợp lệ gần nhất — giữ lại để hiển thị khi bản ghi mới về
+// với aqi=0 (ví dụ ngay sau khi ESP32 vừa khởi động lại, chưa kịp tính).
+let lastValidAqi = 0;
+
 function getAQI(pm25) {
   return AQI_LEVELS.find(l => pm25 <= l.max) || AQI_LEVELS.at(-1);
 }
@@ -681,11 +685,16 @@ function updateLatest(data) {
   document.getElementById("val-humi").innerHTML =
     `${parseFloat(data.humidity).toFixed(1)}<span class="card-unit">%</span>`;
 
-  // Card AQI tổng hợp
-  if (aqiVal > 0) {
-    const cat = getAQICategory(aqiVal);
+  // Card AQI tổng hợp.
+  // Nếu bản ghi mới chưa có AQI (aqi=0, vd ESP32 vừa khởi động lại) thì
+  // giữ nguyên giá trị AQI hợp lệ gần nhất thay vì xóa về "Chưa có".
+  if (aqiVal > 0) lastValidAqi = aqiVal;
+  const displayAqi = lastValidAqi;
+
+  if (displayAqi > 0) {
+    const cat = getAQICategory(displayAqi);
     const numEl = document.getElementById("val-aqi");
-    numEl.textContent = aqiVal;
+    numEl.textContent = displayAqi;
     numEl.style.color = cat.color;
 
     const badge = document.getElementById("aqi-category-badge");
@@ -701,7 +710,7 @@ function updateLatest(data) {
   } else {
     document.getElementById("val-aqi").textContent   = "--";
     document.getElementById("val-aqi").style.color   = "var(--text-muted)";
-    document.getElementById("aqi-category-badge").textContent = "Chưa có — chờ đến đầu giờ tiếp theo";
+    document.getElementById("aqi-category-badge").textContent = "Chưa có dữ liệu — chờ ESP32 gửi lên";
     document.getElementById("aqi-category-badge").className   = "aqi-category-badge aqi-good";
     document.querySelectorAll(".aqi-scale-seg")
             .forEach(s => s.classList.remove("active"));

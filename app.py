@@ -116,6 +116,14 @@ def get_latest():
         row = db.sensor_data.find_one({}, {"_id": 0}, sort=[("timestamp", -1)])
         if row is None:
             return jsonify({"error": "No data yet"}), 404
+        # Nếu bản ghi mới nhất chưa có AQI (=0, vd ESP32 vừa khởi động lại,
+        # chưa chốt được giờ nào) thì lấy AQI của bản ghi gần nhất có giá
+        # trị hợp lệ để vẫn hiển thị giá trị cuối khi tải lại trang.
+        if not row.get("aqi"):
+            last_aqi = db.sensor_data.find_one(
+                {"aqi": {"$gt": 0}}, {"_id": 0, "aqi": 1}, sort=[("timestamp", -1)])
+            if last_aqi:
+                row["aqi"] = last_aqi["aqi"]
         return jsonify(row), 200
     except Exception as e:
         print(f"[ERROR] MongoDB read latest failed: {e}")
