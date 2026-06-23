@@ -393,6 +393,9 @@
       background: var(--bg-card2);
     }
 
+    /* Giữ đơn vị (µg/m³) đúng chữ thường — tránh CSS uppercase biến µ thành Μ */
+    thead th .unit { text-transform: none; }
+
     tbody tr {
       border-bottom: 1px solid rgba(255,255,255,0.04);
       transition: background 0.15s;
@@ -532,8 +535,8 @@
       <thead>
         <tr>
           <th>Thời gian</th>
-          <th>PM2.5 (µg/m³)</th>
-          <th>PM10 (µg/m³)</th>
+          <th>PM2.5 (<span class="unit">µg/m³</span>)</th>
+          <th>PM10 (<span class="unit">µg/m³</span>)</th>
           <th>Mức độ PM2.5</th>
           <th>Nhiệt độ (°C)</th>
           <th>Độ ẩm (%)</th>
