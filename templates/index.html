@@ -353,6 +353,29 @@
       color: var(--text-muted);
     }
 
+    .fc-pm10 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text-main);
+    }
+
+    .fc-pm10 span {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    .fc-metric {
+      display: inline-block;
+      min-width: 44px;
+      font-size: 0.68rem !important;
+      font-weight: 600 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted) !important;
+    }
+
     .fc-aqi {
       font-size: 0.75rem;
       font-weight: 600;
@@ -567,7 +590,7 @@
   <!-- Dự báo bằng học máy -->
   <div class="chart-card" id="forecast-card">
     <div class="chart-header">
-      <span class="chart-title">🔮 Dự báo PM2.5 &amp; PM10 — 3 giờ tới (học máy)</span>
+      <span class="chart-title">🔮 Dự báo PM2.5 &amp; PM10 — 3 giờ tới</span>
       <span style="font-size:0.75rem;color:var(--text-muted);" id="forecast-model-info">Đang tải mô hình...</span>
     </div>
 
@@ -575,17 +598,20 @@
     <div class="forecast-summary" id="forecast-summary" style="display:none;">
       <div class="forecast-chip" id="fc-chip-1h">
         <div class="fc-when">Sau 1 giờ</div>
-        <div class="fc-pm25">--<span> µg/m³</span></div>
+        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
+        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
         <div class="fc-aqi">AQI --</div>
       </div>
       <div class="forecast-chip" id="fc-chip-2h">
         <div class="fc-when">Sau 2 giờ</div>
-        <div class="fc-pm25">--<span> µg/m³</span></div>
+        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
+        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
         <div class="fc-aqi">AQI --</div>
       </div>
       <div class="forecast-chip" id="fc-chip-3h">
         <div class="fc-when">Sau 3 giờ</div>
-        <div class="fc-pm25">--<span> µg/m³</span></div>
+        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
+        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
         <div class="fc-aqi">AQI --</div>
       </div>
     </div>
@@ -598,8 +624,9 @@
     </div>
     <p style="margin-top:12px;font-size:0.72rem;color:var(--text-muted);">
       Mô hình hồi quy Ridge huấn luyện tự động từ dữ liệu tích lũy (gộp 10 phút/điểm) ·
+      Giá trị dự báo là mức trung bình 10 phút tại từng mốc thời điểm ·
       AQI dự kiến quy đổi từ PM2.5/PM10 dự báo theo chuẩn US EPA 2024 ·
-      Kết quả mang tính tham khảo, tin cậy nhất ở tầm 1 giờ
+      Độ tin cậy cao nhất ở tầm dự báo 1 giờ
     </p>
   </div>
 
@@ -945,8 +972,11 @@ const forecastChart = new Chart(fcCtx, {
 function updateForecastChip(id, s) {
   const chip = document.getElementById(id);
   const cat  = getAQICategory(s.aqi);
-  chip.querySelector(".fc-pm25").innerHTML = `${s.pm25.toFixed(1)}<span> µg/m³</span>`;
+  chip.querySelector(".fc-pm25").innerHTML =
+    `<span class="fc-metric">PM2.5</span>${s.pm25.toFixed(1)}<span> µg/m³</span>`;
   chip.querySelector(".fc-pm25").style.color = cat.color;
+  chip.querySelector(".fc-pm10").innerHTML =
+    `<span class="fc-metric">PM10</span>${s.pm10.toFixed(1)}<span> µg/m³</span>`;
   const aqiEl = chip.querySelector(".fc-aqi");
   aqiEl.textContent = `AQI ${s.aqi} · ${cat.label}`;
   aqiEl.className = `fc-aqi ${cat.cls}`;
