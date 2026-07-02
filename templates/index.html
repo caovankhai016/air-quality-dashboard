@@ -1006,9 +1006,10 @@ function updateForecastUI(fc) {
   updateForecastChip("fc-chip-2h", fc.summary["2h"]);
   updateForecastChip("fc-chip-3h", fc.summary["3h"]);
 
-  const maeTxt = fc.model.mae_1h != null ? ` · MAE 1h ≈ ${fc.model.mae_1h} µg/m³` : "";
+  const maeTxt = fc.model.mae_1h != null
+    ? ` · sai số TB dự báo 1h ≈ ${fc.model.mae_1h} µg/m³` : "";
   infoEl.textContent =
-    `${fc.model.name} · ${fc.model.train_points} điểm huấn luyện${maeTxt}`;
+    `Mô hình Ridge · học từ ${fc.model.train_points} điểm dữ liệu${maeTxt}`;
 
   // Ghép trục thời gian: thực tế + dự báo. Đường dự báo nối liền từ điểm
   // thực tế cuối cùng để không bị "đứt" trên biểu đồ.
