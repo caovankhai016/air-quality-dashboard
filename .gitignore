@@ -1,1 +1,3 @@
-airquality.db 
+airquality.db
+Data/
+__pycache__/
