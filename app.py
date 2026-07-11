@@ -4,7 +4,6 @@ import os
 import io
 import csv
 from pymongo import MongoClient
-from forecast import get_forecast
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False  # ngăn Railway proxy chuyển POST → GET do redirect trailing slash
@@ -129,20 +128,6 @@ def get_latest():
     except Exception as e:
         print(f"[ERROR] MongoDB read latest failed: {e}")
         return jsonify({"error": str(e)}), 500
-
-# ── API: DỰ BÁO PM2.5/PM10 BẰNG HỌC MÁY (Ridge regression) ──────────────────
-@app.route("/api/forecast", methods=["GET"])
-def api_forecast():
-    """
-    Dự báo PM2.5/PM10 cho 3 giờ tới, kèm AQI dự kiến (quy đổi EPA 2024).
-    Mô hình Ridge huấn luyện lại tự động từ dữ liệu MongoDB (cache 10 phút).
-    Lỗi ở đây không được ảnh hưởng các tính năng khác — luôn trả JSON status.
-    """
-    try:
-        return jsonify(get_forecast(db)), 200
-    except Exception as e:
-        print(f"[ERROR] Forecast failed: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
 
 # ── API: XUẤT FILE CSV DỮ LIỆU CÓ BỘ LỌC THỜI GIAN ───────────────────────────
 @app.route("/api/export", methods=["GET"])

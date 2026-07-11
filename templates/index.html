@@ -315,76 +315,6 @@
 
     .chart-wrapper { position: relative; height: 260px; }
 
-    /* ── KHỐI DỰ BÁO HỌC MÁY ────────────────────────────────────────────── */
-    .forecast-summary {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .forecast-chip {
-      background: var(--bg-card2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .fc-when {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--text-muted);
-    }
-
-    .fc-pm25 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .fc-pm25 span {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--text-muted);
-    }
-
-    .fc-pm10 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      line-height: 1;
-      color: var(--text-main);
-    }
-
-    .fc-pm10 span {
-      font-size: 0.7rem;
-      font-weight: 400;
-      color: var(--text-muted);
-    }
-
-    .fc-metric {
-      display: inline-block;
-      min-width: 44px;
-      font-size: 0.68rem !important;
-      font-weight: 600 !important;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted) !important;
-    }
-
-    .fc-aqi {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 2px 10px;
-      border-radius: 20px;
-      display: inline-block;
-      width: fit-content;
-    }
-
     /* ── BẢNG DỮ LIỆU ───────────────────────────────────────────────────── */
     .table-card {
       background: var(--bg-card);
@@ -564,7 +494,6 @@
       </div>
     </div>
     <div class="aqi-full-right">
-      <div class="aqi-note">Cập nhật mỗi giờ · Chuẩn US EPA 2024 · Tính từ PM2.5 &amp; PM10 trung bình 1 giờ</div>
       <div class="aqi-scale-bar" id="aqi-scale-bar">
         <div class="aqi-scale-seg" style="background:#3fb950;" title="Tốt (0–50)"></div>
         <div class="aqi-scale-seg" style="background:#d29922;" title="Trung bình (51–100)"></div>
@@ -580,54 +509,11 @@
   <div class="chart-card">
     <div class="chart-header">
       <span class="chart-title">📈 Biểu đồ PM2.5 & PM10 theo thời gian</span>
-      <span style="font-size:0.75rem;color:var(--text-muted);">100 điểm gần nhất · tự động cập nhật</span>
+      <span style="font-size:0.75rem;color:var(--text-muted);">100 điểm gần nhất</span>
     </div>
     <div class="chart-wrapper">
       <canvas id="pm25Chart"></canvas>
     </div>
-  </div>
-
-  <!-- Dự báo bằng học máy -->
-  <div class="chart-card" id="forecast-card">
-    <div class="chart-header">
-      <span class="chart-title">🔮 Dự báo PM2.5 &amp; PM10 — 3 giờ tới</span>
-      <span style="font-size:0.75rem;color:var(--text-muted);" id="forecast-model-info">Đang tải mô hình...</span>
-    </div>
-
-    <!-- Tóm tắt dự báo 1h / 2h / 3h -->
-    <div class="forecast-summary" id="forecast-summary" style="display:none;">
-      <div class="forecast-chip" id="fc-chip-1h">
-        <div class="fc-when">Sau 1 giờ</div>
-        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
-        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
-        <div class="fc-aqi">AQI --</div>
-      </div>
-      <div class="forecast-chip" id="fc-chip-2h">
-        <div class="fc-when">Sau 2 giờ</div>
-        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
-        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
-        <div class="fc-aqi">AQI --</div>
-      </div>
-      <div class="forecast-chip" id="fc-chip-3h">
-        <div class="fc-when">Sau 3 giờ</div>
-        <div class="fc-pm25"><span class="fc-metric">PM2.5</span> --<span> µg/m³</span></div>
-        <div class="fc-pm10"><span class="fc-metric">PM10</span> --<span> µg/m³</span></div>
-        <div class="fc-aqi">AQI --</div>
-      </div>
-    </div>
-
-    <!-- Thông báo khi chưa đủ dữ liệu / lỗi -->
-    <div class="empty" id="forecast-msg" style="display:none;"></div>
-
-    <div class="chart-wrapper" id="forecast-chart-wrap">
-      <canvas id="forecastChart"></canvas>
-    </div>
-    <p style="margin-top:12px;font-size:0.72rem;color:var(--text-muted);">
-      Mô hình tự huấn luyện lại khi có dữ liệu mới ·
-      Giá trị dự báo là mức trung bình 10 phút tại từng mốc thời điểm ·
-      AQI dự kiến quy đổi từ PM2.5/PM10 dự báo theo chuẩn US EPA 2024 ·
-      Độ tin cậy cao nhất ở tầm dự báo 1 giờ
-    </p>
   </div>
 
   <!-- Bảng lịch sử -->
@@ -891,158 +777,6 @@ async function fetchData() {
   }
 }
 
-// ── DỰ BÁO HỌC MÁY ──────────────────────────────────────────────────────────
-// Biểu đồ: 6 giờ thực tế gần nhất (nét liền) + 3 giờ dự báo (nét đứt),
-// cùng thang 10 phút/điểm. Dữ liệu lấy từ /api/forecast (server cache 10 phút).
-const fcCtx = document.getElementById("forecastChart").getContext("2d");
-const forecastChart = new Chart(fcCtx, {
-  type: "line",
-  data: { labels: [], datasets: [
-    {
-      label: "PM2.5 thực tế",
-      data: [],
-      borderColor: "#58a6ff",
-      backgroundColor: "rgba(88,166,255,0.08)",
-      borderWidth: 2,
-      pointRadius: 0,
-      fill: true,
-      tension: 0.35,
-    },
-    {
-      label: "PM2.5 dự báo",
-      data: [],
-      borderColor: "#3fb950",
-      borderWidth: 2,
-      borderDash: [6, 5],
-      pointRadius: 2,
-      fill: false,
-      tension: 0.35,
-    },
-    {
-      label: "PM10 thực tế",
-      data: [],
-      borderColor: "#a371f7",
-      backgroundColor: "rgba(163,113,247,0.06)",
-      borderWidth: 2,
-      pointRadius: 0,
-      fill: true,
-      tension: 0.35,
-      hidden: true,   // ẩn mặc định cho gọn — bấm chú giải để hiện
-    },
-    {
-      label: "PM10 dự báo",
-      data: [],
-      borderColor: "#d29922",
-      borderWidth: 2,
-      borderDash: [6, 5],
-      pointRadius: 2,
-      fill: false,
-      tension: 0.35,
-      hidden: true,
-    },
-  ]},
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true, labels: { color: "#7d8590", font: { size: 12 }, boxWidth: 14 } },
-      tooltip: {
-        backgroundColor: "#1c2330",
-        borderColor: "rgba(255,255,255,0.1)",
-        borderWidth: 1,
-        titleColor: "#7d8590",
-        bodyColor: "#e6edf3",
-        callbacks: {
-          label: ctx => ctx.parsed.y == null ? null
-            : ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} µg/m³`
-        }
-      }
-    },
-    scales: {
-      x: { ticks: { color: "#7d8590", maxTicksLimit: 9, font: { size: 11 } },
-           grid:  { color: "rgba(255,255,255,0.05)" } },
-      y: { ticks: { color: "#7d8590", font: { size: 11 } },
-           grid:  { color: "rgba(255,255,255,0.05)" },
-           title: { display: true, text: "µg/m³", color: "#7d8590", font: { size: 11 } },
-           min: 0 }
-    }
-  }
-});
-
-function updateForecastChip(id, s) {
-  const chip = document.getElementById(id);
-  const cat  = getAQICategory(s.aqi);
-  chip.querySelector(".fc-pm25").innerHTML =
-    `<span class="fc-metric">PM2.5</span>${s.pm25.toFixed(1)}<span> µg/m³</span>`;
-  chip.querySelector(".fc-pm25").style.color = cat.color;
-  chip.querySelector(".fc-pm10").innerHTML =
-    `<span class="fc-metric">PM10</span>${s.pm10.toFixed(1)}<span> µg/m³</span>`;
-  const aqiEl = chip.querySelector(".fc-aqi");
-  aqiEl.textContent = `AQI ${s.aqi} · ${cat.label}`;
-  aqiEl.className = `fc-aqi ${cat.cls}`;
-}
-
-function updateForecastUI(fc) {
-  const msgEl     = document.getElementById("forecast-msg");
-  const summaryEl = document.getElementById("forecast-summary");
-  const wrapEl    = document.getElementById("forecast-chart-wrap");
-  const infoEl    = document.getElementById("forecast-model-info");
-
-  if (fc.status !== "ok") {
-    // Chưa đủ dữ liệu hoặc lỗi: chỉ ẩn khối dự báo, dashboard còn lại bình thường
-    summaryEl.style.display = "none";
-    wrapEl.style.display    = "none";
-    msgEl.style.display     = "block";
-    msgEl.innerHTML = `<span>⏳</span>${fc.message || "Chưa thể dự báo."}`;
-    infoEl.textContent = "";
-    return;
-  }
-
-  msgEl.style.display     = "none";
-  summaryEl.style.display = "grid";
-  wrapEl.style.display    = "block";
-
-  updateForecastChip("fc-chip-1h", fc.summary["1h"]);
-  updateForecastChip("fc-chip-2h", fc.summary["2h"]);
-  updateForecastChip("fc-chip-3h", fc.summary["3h"]);
-
-  const maeTxt = fc.model.mae_1h != null
-    ? ` · sai số TB dự báo 1h ≈ ${fc.model.mae_1h} µg/m³` : "";
-  infoEl.textContent =
-    `Mô hình Ridge · học từ ${fc.model.train_points} điểm dữ liệu${maeTxt}`;
-
-  // Ghép trục thời gian: thực tế + dự báo. Đường dự báo nối liền từ điểm
-  // thực tế cuối cùng để không bị "đứt" trên biểu đồ.
-  const histLabels = fc.history.map(p => p.time.slice(11));   // HH:MM
-  const fcLabels   = fc.forecast.map(p => p.time.slice(11));
-  const nHist = fc.history.length;
-
-  forecastChart.data.labels = [...histLabels, ...fcLabels];
-  forecastChart.data.datasets[0].data =
-    [...fc.history.map(p => p.pm25), ...Array(fc.forecast.length).fill(null)];
-  forecastChart.data.datasets[1].data =
-    [...Array(nHist - 1).fill(null), fc.history[nHist - 1].pm25,
-     ...fc.forecast.map(p => p.pm25)];
-  forecastChart.data.datasets[2].data =
-    [...fc.history.map(p => p.pm10), ...Array(fc.forecast.length).fill(null)];
-  forecastChart.data.datasets[3].data =
-    [...Array(nHist - 1).fill(null), fc.history[nHist - 1].pm10,
-     ...fc.forecast.map(p => p.pm10)];
-  forecastChart.update();
-}
-
-async function fetchForecast() {
-  try {
-    const res = await fetch("/api/forecast");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    updateForecastUI(await res.json());
-  } catch (err) {
-    console.error("Lỗi lấy dự báo:", err);
-    updateForecastUI({ status: "error",
-      message: "Không lấy được dự báo — thử lại sau ít phút." });
-  }
-}
-
 // ── XUẤT CSV ────────────────────────────────────────────────────────────────
 function triggerExport() {
   const range = document.getElementById("export-range").value;
@@ -1052,10 +786,6 @@ function triggerExport() {
 // ── TỰ ĐỘNG CẬP NHẬT MỖI 15 GIÂY (khớp chu kỳ ESP32) ───────────────────────
 fetchData();
 setInterval(fetchData, 15000);
-
-// Dự báo cập nhật mỗi 5 phút (server đã cache 10 phút nên không tốn tài nguyên)
-fetchForecast();
-setInterval(fetchForecast, 300000);
 </script>
 </body>
 </html>
